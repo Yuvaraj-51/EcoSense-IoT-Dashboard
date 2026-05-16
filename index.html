@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="UTF-8" />
+
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0" />
+
+  <title>EcoSense IoT Dashboard</title>
+
+  <link rel="stylesheet"
+        href="style.css" />
+
+  <!-- CHART JS -->
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- FIREBASE -->
+
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+</head>
+
+<body>
+
+  <!-- GRID BACKGROUND -->
+
+  <div class="bg-grid"></div>
+
+  <!-- HEADER -->
+
+  <header class="topbar">
+
+    <div class="brand">
+
+      <div class="logo">
+        🌿
+      </div>
+
+      <div>
+
+        <h1>EcoSense IoT</h1>
+
+        <p>
+          Smart Environmental Platform
+        </p>
+
+      </div>
+
+    </div>
+
+    <div class="status-box">
+
+      <span class="live-dot"></span>
+
+      LIVE DATA
+
+    </div>
+
+  </header>
+
+  <!-- ALERT BAR -->
+
+  <section id="dangerAlert"
+           class="danger-alert hidden">
+
+    ⚠️ Danger Alert
+
+  </section>
+
+  <!-- POPUP ALERT -->
+
+  <div id="popupAlert"
+       class="popup hidden">
+
+    <div class="popup-box">
+
+      <h2>
+        ⚠️ DANGER ALERT
+      </h2>
+
+      <p id="popupMessage">
+
+        Danger detected
+
+      </p>
+
+      <button onclick="closePopup()">
+
+        OK
+
+      </button>
+
+    </div>
+
+  </div>
+
+  <!-- MAIN DASHBOARD -->
+
+  <main class="dashboard">
+
+    <!-- TEMPERATURE -->
+
+    <div class="card temperature">
+
+      <div class="card-head">
+
+        <div>
+
+          <h3>Temperature</h3>
+
+          <p>DHT11 Sensor</p>
+
+        </div>
+
+        <span>🌡️</span>
+
+      </div>
+
+      <h2 id="temperature">
+
+        --
+
+      </h2>
+
+      <small>°C</small>
+
+      <div class="badge normal">
+
+        ● NORMAL
+
+      </div>
+
+      <canvas id="tempChart"></canvas>
+
+    </div>
+
+    <!-- HUMIDITY -->
+
+    <div class="card humidity">
+
+      <div class="card-head">
+
+        <div>
+
+          <h3>Humidity</h3>
+
+          <p>DHT11 Sensor</p>
+
+        </div>
+
+        <span>💧</span>
+
+      </div>
+
+      <h2 id="humidity">
+
+        --
+
+      </h2>
+
+      <small>%</small>
+
+      <div class="badge optimal">
+
+        ● OPTIMAL
+
+      </div>
+
+      <canvas id="humChart"></canvas>
+
+    </div>
+
+    <!-- AIR QUALITY -->
+
+    <div class="card air">
+
+      <div class="card-head">
+
+        <div>
+
+          <h3>Air Quality</h3>
+
+          <p>MQ135 Sensor</p>
+
+        </div>
+
+        <span>🌫️</span>
+
+      </div>
+
+      <h2 id="airQuality">
+
+        --
+
+      </h2>
+
+      <small>AQI</small>
+
+      <div id="airStatus"
+           class="badge moderate">
+
+        ● MODERATE
+
+      </div>
+
+      <canvas id="airChart"></canvas>
+
+    </div>
+
+    <!-- CO2 -->
+
+    <div class="card co2">
+
+      <div class="card-head">
+
+        <div>
+
+          <h3>CO₂ Level</h3>
+
+          <p>Estimated ppm</p>
+
+        </div>
+
+        <span>☁️</span>
+
+      </div>
+
+      <h2 id="co2">
+
+        --
+
+      </h2>
+
+      <small>ppm</small>
+
+      <div class="badge normal">
+
+        ● NORMAL
+
+      </div>
+
+      <canvas id="co2Chart"></canvas>
+
+    </div>
+
+  </main>
+
+  <!-- LOWER PANELS -->
+
+  <section class="bottom-grid">
+
+    <!-- SENSOR NETWORK -->
+
+    <div class="panel">
+
+      <h3>Sensor Network</h3>
+
+      <p>
+        Cloud-connected ESP8266 monitoring system
+      </p>
+
+      <div class="nodes">
+
+        <div class="node">
+
+          🟢 Node A-01
+
+          <span>
+            DHT11 Temperature Active
+          </span>
+
+        </div>
+
+        <div class="node">
+
+          🟢 Node A-02
+
+          <span>
+            DHT11 Humidity Active
+          </span>
+
+        </div>
+
+        <div class="node">
+
+          🟢 Node B-01
+
+          <span>
+            MQ135 Air Sensor Active
+          </span>
+
+        </div>
+
+        <div class="node">
+
+          🟣 Firebase Cloud
+
+          <span>
+            Realtime Database Connected
+          </span>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- ALERT LOG -->
+
+    <div class="panel">
+
+      <h3>Alert Log</h3>
+
+      <div id="logs"
+           class="logs">
+
+      </div>
+
+    </div>
+
+    <!-- SESSION STATS -->
+
+    <div class="panel">
+
+      <h3>Session Stats</h3>
+
+      <div class="stat">
+
+        <span>
+          Readings Collected
+        </span>
+
+        <b id="count">
+          0
+        </b>
+
+      </div>
+
+      <div class="stat">
+
+        <span>
+          Avg Temperature
+        </span>
+
+        <b id="avgTemp">
+          -- °C
+        </b>
+
+      </div>
+
+      <div class="stat">
+
+        <span>
+          Peak AQI
+        </span>
+
+        <b id="peakAir">
+          --
+        </b>
+
+      </div>
+
+      <div class="stat">
+
+        <span>
+          Data Quality
+        </span>
+
+        <b class="green">
+          98.4%
+        </b>
+
+      </div>
+
+    </div>
+
+  </section>
+
+  <!-- FOOTER -->
+
+  <footer>
+
+    EcoSense IoT Platform · Firebase Dashboard · 2026
+
+  </footer>
+
+  <!-- SCRIPT -->
+
+  <script src="script.js"></script>
+
+</body>
+
+</html>
